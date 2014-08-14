@@ -1613,8 +1613,8 @@ config FORCE_FAST_CHARGE
 	bool "Force AC charge mode at will"
 	default n
 	help
-		A simple sysfs interface to force adapters that
-		are detected as USB to charge as AC.
+	  A simple sysfs interface to force adapters that
+	  are detected as USB to charge as AC.
 
 if CPU_FREQ_MSM
 
