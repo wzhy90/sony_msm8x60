@@ -2393,6 +2393,12 @@ static struct msm_i2c_ssbi_platform_data msm_ssbi3_pdata = {
 #define MSM_FB_SIZE roundup(MSM_FB_PRIM_BUF_SIZE + MSM_FB_EXT_BUF_SIZE + \
 				MSM_FB_DSUB_PMEM_ADDER, 4096)
 
+#ifdef CONFIG_CMA
+#define MSM_DMA_CONTIGUOUS_BASE 0x0
+#define MSM_DMA_CONTIGUOUS_LIMIT 0x20000000
+static u64 msm_dmamask = DMA_BIT_MASK(32);
+#endif
+
 #define MSM_PMEM_SF_SIZE 0x6E00000 /* 110 Mbytes */
 #define MSM_HDMI_PRIM_PMEM_SF_SIZE 0x8000000 /* 128 Mbytes */
 
@@ -2444,8 +2450,6 @@ unsigned char hdmi_is_primary;
 #define MSM_ION_MM_SIZE		0x3E00000  /* (62MB) */
 #define MSM_ION_MFC_SIZE	SZ_8K
 
-#define MSM_ION_MM_HEAP_BASE 0x0
-#define MSM_ION_MM_HEAP_LIMIT 0x20000000
 #ifdef CONFIG_CMA
 #define MSM_ION_MM_HEAP_TYPE ION_HEAP_TYPE_DMA
 #define MSM_ION_MM_SIZE_CARVING 0x0
@@ -4412,8 +4416,7 @@ static struct ion_co_heap_pdata co_mm_ion_pdata = {
 	.align = PAGE_SIZE,
 };
 
-static u64 msm_dmamask = DMA_BIT_MASK(32);
-
+#ifdef CONFIG_CMA
 static struct platform_device ion_mm_heap_device = {
 	.name = "ion-mm-heap-device",
 	.id = -1,
@@ -4422,6 +4425,7 @@ static struct platform_device ion_mm_heap_device = {
 		.coherent_dma_mask = DMA_BIT_MASK(32),
 	}
 };
+#endif
 #endif
 
 /**
@@ -4450,7 +4454,9 @@ struct ion_platform_heap msm8x60_heaps [] = {
 			.size	= MSM_ION_MM_SIZE,
 			.memory_type = ION_SMI_TYPE,
 			.extra_data = (void *) &co_mm_ion_pdata,
+#ifdef CONFIG_CMA
 			.priv = (void *) &ion_mm_heap_device.dev,
+#endif
 		},
 		{
 			.id     = ION_MM_FIRMWARE_HEAP_ID,
@@ -4460,7 +4466,9 @@ struct ion_platform_heap msm8x60_heaps [] = {
 			.size	= MSM_MM_FW_SIZE,
 			.memory_type = ION_SMI_TYPE,
 			.extra_data = (void *) &mm_fw_co_ion_pdata,
+#ifdef CONFIG_CMA
 			.priv = (void *) &ion_mm_heap_device.dev,
+#endif
 		},
 		{
 			.id	= ION_CP_MFC_HEAP_ID,
@@ -4478,6 +4486,9 @@ struct ion_platform_heap msm8x60_heaps [] = {
 			.size	= MSM_ION_SF_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *)&co_ion_pdata,
+#ifdef CONFIG_CMA
+			.priv = (void *) &ion_mm_heap_device.dev,
+#endif
 		},
 		{
 			.id	= ION_CAMERA_HEAP_ID,
@@ -4486,7 +4497,9 @@ struct ion_platform_heap msm8x60_heaps [] = {
 			.size	= MSM_ION_CAMERA_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = &co_ion_pdata,
+#ifdef CONFIG_CMA
 			.priv = (void *) &ion_mm_heap_device.dev,
+#endif
 		},
 		{
 			.id     = ION_CP_WB_HEAP_ID,
@@ -4504,7 +4517,9 @@ struct ion_platform_heap msm8x60_heaps [] = {
 			.size	= MSM_ION_QSECOM_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *) &co_ion_pdata,
+#ifdef CONFIG_CMA
 			.priv = (void *) &ion_mm_heap_device.dev,
+#endif
 		},
 #endif
 		{
@@ -4514,7 +4529,9 @@ struct ion_platform_heap msm8x60_heaps [] = {
 			.size	= MSM_ION_AUDIO_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *)&co_ion_pdata,
+#ifdef CONFIG_CMA
 			.priv = (void *) &ion_mm_heap_device.dev,
+#endif
 		},
 #endif
 };
@@ -4777,8 +4794,35 @@ static void __init msm8x60_reserve(void)
 	dma_declare_contiguous(
 			&ion_mm_heap_device.dev,
 			MSM_ION_MM_SIZE,
-			MSM_ION_MM_HEAP_BASE,
-			MSM_ION_MM_HEAP_LIMIT);
+			MSM_DMA_CONTIGUOUS_BASE,
+			MSM_DMA_CONTIGUOUS_LIMIT);
+	dma_declare_contiguous(
+			&ion_mm_heap_device.dev,
+			MSM_MM_FW_SIZE,
+			MSM_DMA_CONTIGUOUS_BASE,
+			MSM_DMA_CONTIGUOUS_LIMIT);
+	dma_declare_contiguous(
+			&ion_mm_heap_device.dev,
+			MSM_ION_SF_SIZE,
+			MSM_DMA_CONTIGUOUS_BASE,
+			MSM_DMA_CONTIGUOUS_LIMIT);
+	dma_declare_contiguous(
+			&ion_mm_heap_device.dev,
+			MSM_ION_CAMERA_SIZE,
+			MSM_DMA_CONTIGUOUS_BASE,
+			MSM_DMA_CONTIGUOUS_LIMIT);
+#ifdef CONFIG_QSEECOM
+	dma_declare_contiguous(
+			&ion_mm_heap_device.dev,
+			MSM_ION_QSECOM_SIZE,
+			MSM_DMA_CONTIGUOUS_BASE,
+			MSM_DMA_CONTIGUOUS_LIMIT);
+#endif
+	dma_declare_contiguous(
+			&ion_mm_heap_device.dev,
+			MSM_ION_AUDIO_SIZE,
+			MSM_DMA_CONTIGUOUS_BASE,
+			MSM_DMA_CONTIGUOUS_LIMIT);
 #endif
 
 //adding by rick
