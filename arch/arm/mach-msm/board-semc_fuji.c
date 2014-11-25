@@ -2452,6 +2452,7 @@ unsigned char hdmi_is_primary;
 #else
 #define MSM_ION_MM_HEAP_TYPE ION_HEAP_TYPE_CARVEOUT
 #define MSM_ION_MM_SIZE_CARVING MSM_ION_MM_SIZE
+#endif
 
 #define MSM_MM_FW_BASE		MSM_SMI_BASE
 #define MSM_ION_HOLE_BASE	(MSM_MM_FW_BASE + MSM_MM_FW_SIZE)
@@ -4453,12 +4454,13 @@ struct ion_platform_heap msm8x60_heaps [] = {
 		},
 		{
 			.id     = ION_MM_FIRMWARE_HEAP_ID,
-			.type   = ION_HEAP_TYPE_CARVEOUT,
+			.type   = MSM_ION_MM_HEAP_TYPE,
 			.name   = ION_MM_FIRMWARE_HEAP_NAME,
 			.base	= MSM_MM_FW_BASE,
 			.size	= MSM_MM_FW_SIZE,
 			.memory_type = ION_SMI_TYPE,
 			.extra_data = (void *) &mm_fw_co_ion_pdata,
+			.priv = (void *) &ion_mm_heap_device.dev,
 		},
 		{
 			.id	= ION_CP_MFC_HEAP_ID,
@@ -4479,11 +4481,12 @@ struct ion_platform_heap msm8x60_heaps [] = {
 		},
 		{
 			.id	= ION_CAMERA_HEAP_ID,
-			.type	= ION_HEAP_TYPE_CARVEOUT,
+			.type	= MSM_ION_MM_HEAP_TYPE,
 			.name	= ION_CAMERA_HEAP_NAME,
 			.size	= MSM_ION_CAMERA_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = &co_ion_pdata,
+			.priv = (void *) &ion_mm_heap_device.dev,
 		},
 		{
 			.id     = ION_CP_WB_HEAP_ID,
@@ -4496,20 +4499,22 @@ struct ion_platform_heap msm8x60_heaps [] = {
 #ifdef CONFIG_QSEECOM
 		{
 			.id	= ION_QSECOM_HEAP_ID,
-			.type	= ION_HEAP_TYPE_CARVEOUT,
+			.type	= MSM_ION_MM_HEAP_TYPE,
 			.name	= ION_QSECOM_HEAP_NAME,
 			.size	= MSM_ION_QSECOM_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *) &co_ion_pdata,
+			.priv = (void *) &ion_mm_heap_device.dev,
 		},
 #endif
 		{
 			.id	= ION_AUDIO_HEAP_ID,
-			.type	= ION_HEAP_TYPE_CARVEOUT,
+			.type	= MSM_ION_MM_HEAP_TYPE,
 			.name	= ION_AUDIO_HEAP_NAME,
 			.size	= MSM_ION_AUDIO_SIZE,
 			.memory_type = ION_EBI_TYPE,
 			.extra_data = (void *)&co_ion_pdata,
+			.priv = (void *) &ion_mm_heap_device.dev,
 		},
 #endif
 };
